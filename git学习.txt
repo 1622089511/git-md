@@ -1,0 +1,138 @@
+$ git 版本管理工具笔记：
+Stage1:
+一：介绍
+集中式和分布式：
+集中式：版本库存放在中央服务器中，实现业务必须从中央服务器获取最新的版本，完成个人工作需要推送自己的项目到中央服务器。和图书馆的借书还书类似。
+缺点：必须连接互联网，可能会提交文件很慢。中央服务器出现问题，影响大。
+
+分布式：每个人都拥有一个版本库，完成工作可以互相推送修改后的内容。		
+优点：功能强大的分支管理，文件丢失后可以复制他人文件。
+
+两种都有免费和收费的版本，但现在最好用的还是$ git。
+二：开始   
+
+$ git Bash  //$ git 命令行界面
+第一步：设置自己的名字和邮箱地址
+$ git config --global user.name "xw"
+$ git config --global user.email  "1622089511@qq.com"
+
+第二步：
+$ mkdir x       //在admistrator创建了一个空的文件夹
+$ cd x  
+$ pwd           //显示当前目录地址
+$ git init      //初始化一个$ git可以管理的仓库
+
+将写好的txt保存在$ git主目录下
+$ git add file            //这里可以add多个  $ git add file1  file2 
+$ git commit -m "x"      	 //使用$ git commit  提交文件完成
+
+第三步： 时光机穿梭
+
+对文件修改提交和查看状态
+$ cat file                //查看当前内容
+$ git status  //查看状态
+$ git diff  file     	 //查看修改内容
+
+$ git add file     		 //再次添加
+$ git commit -m "描述"  	 //确定
+$ git status                 //查看当前状态  
+
+
+完成后显示  modified:  file 
+$ git log                //查看提交日志,里面会显示user信息,时间和commit的描述
+$ git log --pretty=oneline  //这样可以 
+
+版本回退
+$ git reset --hard HEAD^
+这个时候内容就是上一次提交的内容
+$ git reset --hard xxx     //这里xxx指commit_id
+
+head指向的就是当前版本,这个时候head指向又到了xxx那里
+
+$ git reflog来记录每一行命令
+
+第四步：工作区和缓存区
+工作区：当前主机$ git的目录
+版本库：工作区有个隐藏目录.$ git，这个是$ git的版本库
+缓存区：版本库内的stage(index)即缓存区
+分支：$ git创建的master分支
+HEAD：指向master的指针
+
+$ git add : 将当前文件添加到缓存区
+$ git commit : 指定缓存区的东西提交到分支内
+一旦提交如果没有别的内容那么缓存区status是干净的
+总结：在主目录下创建的文件是工作区,$ git add进去的地址是缓存区,$ git commit进去的地址是分支，
+而分支存在一个HEAD指针指向当前的分支，可以通过HEAD来回溯，也可用$ git log查询执行
+命令信息，reflog可以看到操作记录，$ git reset可以回到目标版本号地址，此时HEAD指向当前的commit_id。
+
+第五步 ：管理修改，撤销修改，删除文件
+
+修改过程：第一次修改 -> $ git add -> 第二次修改 -> $ git add -> $ git commit
+          修改的内容必须要先add到缓存区，commit只会提交缓存区的内容
+
+撤销修改： $ git checkout -- file  
+         
+		一种是readme 自修改后还没有被放到暂存区，现在，撤销修改就回到和版本库一模一样的状态；
+		一种是readme 已经添加到暂存区后，又作了修改，现在，撤销修改就回到添加到暂存区后的状态。
+删除文件：$ rm file 
+		确实要删除： $ git rm file 
+		删错了：$ checkout -- file  就是撤销修改此文件
+
+Stage2: 		
+	准备工作：将自己的ssh下面的.pub添加到$ github上面,然后打开自己的当前项目创建新的仓库
+	分支管理： $ git remote add origin $ git@server-name:path/repo-name.$ git      //在自己的工作区关联进远程的$ github仓库
+		如果已存在那么$ git remote rm origin
+		$ git push -u origin master									  // 将当前主分支推送到repository
+		
+		此后，每次本地提交后，只要有必要，就可以使用命令$ git push origin master推送最新修改；
+		分布式版本系统的最大好处之一是在本地工作完全不需要考虑远程库的存在，也就是有没有联网都可以正常工作.
+		
+	克隆远程仓库：$ git clone $ git@$ github.com:用户名/xxx.$ git
+	
+stage3:	
+一：分支:
+	分支在实际中有什么用呢？
+		假设你准备开发一个新功能，创建了一个属于你自己的分支，别人看不到，还继续在原来的分支上正常工作，
+	而你在自己的分支上干活，想提交就提交，直到开发完毕后，再一次性合并到原来的分支上，这样，既安全，又不影响别人工作。
+	
+二：分支操作
+	
+	查看分支：$ git branch 
+	创建分支：$ git branch xxx
+	切换分支: $ git checkout xxx 
+	创建加切换： $ git branch -b xxx
+	合并到当前分支： $ git merge xxx
+	删除分支:	 $ git branch -d xxx
+	
+三：分支中的冲突	
+	当master分支和我们自定义分支各自都分别有新的commit,合并时就会有冲突，必须解决冲突，再提交。
+	用$ git log --graph命令可以看到分支合并图
+	$ git log --graph --pretty=oneline --abbrev-commit
+	
+四: 分支管理策略
+	在实际开发中，我们应该按照几个基本原则进行分支管理：
+	不使用forward提交$ git merge --no ff -m"描述" dev
+	master分支应该是非常稳定的，也就是仅用来发布新版本，平时不能在上面干活；
+	干活都在dev分支上，也就是说，dev分支是不稳定的，到某个时候再把dev分支合并到master上。
+	
+五：BUG分支
+	$ git stash保存当前内容
+	创建分支 编辑vi xxx       退出ZZ 或者:wq   然后添加并提交 切换到主分支合并
+	然后又可以到stash的dev工作区工作，$ git stash list可以查看工作现场
+	恢复工作现场使用$ git stash apply，但是恢复后后,stash内容依旧存在要用$ git stash drop来删除
+				也可使用$ git stash pop 恢复的同时把stash内容删掉
+	查看使用：$ git stash list 
+	强行删除分支： $ git branch -D XXX
+六：多人协作
+	显示连接的远程地址$ git remote -v 
+	合并远程$ git pull
+	推送分支$ git push origin master或者dev
+	发布到线上
+    $ git tag publish/0.1.5
+    $ git push origin publish/0.1.5:publish/0.1.5
+final:
+	切换到分支上然后 $ git tag xxx添加标签, 然后使用命令$ git tag可以查看所有标签
+	$ git show <tagname>查看标签信息
+	Deleted tag 'v0.1' (was e078af9) 删除标签
+	$ git push origin <tagname>
+	$ git push origin --tags
